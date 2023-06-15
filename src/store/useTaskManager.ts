@@ -1,37 +1,30 @@
-import useTaskStore, { Task } from '@/components/useTaskStore';
-import { useState } from 'react';
+import { Task } from '@/components/useTaskStore';
+import create from 'zustand';
 
-const useTaskManager = () => {
-  const [searchText, setSearchText] = useState('');
-  const tasks = useTaskStore((state) => state.searchTask(searchText));
-  const addTask = useTaskStore((state) => state.addTask);
-  const updateTask = useTaskStore((state) => state.updateTask);
-  const deleteTask = useTaskStore((state) => state.deleteTask);
+interface TaskState {
+  searchTask: string;
+  tasks: Task[];
+  setSearchTask: (text: string) => void;
+  addTask: (task: Task) => void;
+  updateTask: (taskId: number, updatedTask: Partial<Task>) => void;
+  deleteTask: (taskId: number) => void;
+}
 
-  const handleSearch = (text: string) => {
-    setSearchText(text);
-  };
-
-  const handleAddTask = (task: Task) => {
-    addTask(task);
-  };
-
-  const handleUpdateTask = (taskId: number, updatedTask: Partial<Task>) => {
-    updateTask(taskId, updatedTask);
-  };
-
-  const handleDeleteTask = (taskId: number) => {
-    deleteTask(taskId);
-  };
-
-  return {
-    searchText,
-    tasks,
-    handleSearch,
-    handleAddTask,
-    handleUpdateTask,
-    handleDeleteTask,
-  };
-};
+const useTaskManager = create<TaskState>((set) => ({
+  searchTask: '',
+  tasks: [],
+  setSearchTask: (text) => set((state) => ({ searchTask: text })),
+  addTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
+  updateTask: (taskId, updatedTask) =>
+    set((state) => ({
+      tasks: state.tasks.map((task) =>
+        task.id === taskId ? { ...task, ...updatedTask } : task
+      ),
+    })),
+  deleteTask: (taskId) =>
+    set((state) => ({
+      tasks: state.tasks.filter((task) => task.id !== taskId),
+    })),
+}));
 
 export default useTaskManager;

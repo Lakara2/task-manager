@@ -1,9 +1,10 @@
 import create, { GetState, SetState } from 'zustand';
 
-export type Task = {
+export interface Task {
   id: number;
   title: string;
-};
+  completed: boolean;
+}
 
 type TaskState = {
   tasks: Task[];
